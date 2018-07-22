@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.LENGTH_LONG).show();
                 return true;
             default:
-                return onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(item);
         }
     }
 
