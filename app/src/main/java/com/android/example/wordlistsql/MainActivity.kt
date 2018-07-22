@@ -19,14 +19,13 @@ package com.android.example.wordlistsql
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * Implements a RecyclerView that displays a list of words from a SQL database.
@@ -37,7 +36,6 @@ import android.widget.Toast
 class MainActivity : AppCompatActivity() {
 
     private var mDB: WordListOpenHelper? = null
-    private var mRecyclerView: RecyclerView? = null
     private var mAdapter: WordListAdapter? = null
     private val mLastPosition: Int = 0
 
@@ -47,15 +45,13 @@ class MainActivity : AppCompatActivity() {
 
         mDB = WordListOpenHelper(this)
 
-        mRecyclerView = findViewById(R.id.recyclerview) as RecyclerView
         mAdapter = WordListAdapter(this, mDB)
-        mRecyclerView?.apply {
+        recyclerview?.apply {
             adapter = mAdapter
             layoutManager = LinearLayoutManager(this@MainActivity)
         }
 
         // Add a floating action click handler for creating new entries.
-        val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener {
             // Starts empty edit activity.
             val intent = Intent(baseContext, EditWordActivity::class.java)
