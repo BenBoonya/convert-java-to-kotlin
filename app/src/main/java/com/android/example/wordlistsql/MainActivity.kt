@@ -81,29 +81,29 @@ class MainActivity : AppCompatActivity() {
             }
 
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == WORD_EDIT) {
             if (resultCode == Activity.RESULT_OK) {
-                val word = data.getStringExtra(EditWordActivity.EXTRA_REPLY)
+                data?.getStringExtra(EditWordActivity.EXTRA_REPLY)?.let {
+                    // Update the database.
+                    if (!TextUtils.isEmpty(it)) {
+                        val id = data.getIntExtra(WordListAdapter.EXTRA_ID, -99)
 
-                // Update the database.
-                if (!TextUtils.isEmpty(word)) {
-                    val id = data.getIntExtra(WordListAdapter.EXTRA_ID, -99)
-
-                    if (id == WORD_ADD) {
-                        mDB?.insert(word)
-                    } else if (id >= 0) {
-                        mDB?.update(id, word)
+                        if (id == WORD_ADD) {
+                            mDB?.insert(it)
+                        } else if (id >= 0) {
+                            mDB?.update(id, it)
+                        }
+                        // Update the UI.
+                        mAdapter?.notifyDataSetChanged()
+                    } else {
+                        Toast.makeText(
+                                applicationContext,
+                                R.string.empty_not_saved,
+                                Toast.LENGTH_LONG).show()
                     }
-                    // Update the UI.
-                    mAdapter?.notifyDataSetChanged()
-                } else {
-                    Toast.makeText(
-                            applicationContext,
-                            R.string.empty_not_saved,
-                            Toast.LENGTH_LONG).show()
                 }
             }
         }
