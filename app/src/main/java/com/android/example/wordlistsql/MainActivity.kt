@@ -35,16 +35,13 @@ import kotlinx.android.synthetic.main.activity_main.*
  */
 class MainActivity : AppCompatActivity() {
 
-    private var mDB: WordListOpenHelper? = null
+    private val mDB by lazy { WordListOpenHelper(this) }
     private var mAdapter: WordListAdapter? = null
     private val mLastPosition: Int = 0
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        mDB = WordListOpenHelper(this)
-
         mAdapter = WordListAdapter(this, mDB)
         recyclerview?.apply {
             adapter = mAdapter
