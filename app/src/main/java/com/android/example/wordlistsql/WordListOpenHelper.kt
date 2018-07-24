@@ -26,13 +26,6 @@ import android.util.Log
 
 class WordListOpenHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
-    private var mWritableDB: SQLiteDatabase? = null
-    private var mReadableDB: SQLiteDatabase? = null
-
-    init {
-        Log.d(TAG, "Construct WordListOpenHelper")
-    }
-
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(WORD_LIST_TABLE_CREATE)
         fillDatabaseWithData(db)
@@ -73,18 +66,19 @@ class WordListOpenHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         val entry = WordItem()
 
         try {
-            if (mReadableDB == null) {
-                mReadableDB = readableDatabase
+            cursor = readableDatabase.rawQuery(query, null)
+            cursor?.let {
+                it.moveToFirst()
+                entry.apply {
+                    id = it.getInt(it.getColumnIndex(KEY_ID))
+                    word = it.getString(it.getColumnIndex(KEY_WORD))
+                }
             }
-            cursor = mReadableDB!!.rawQuery(query, null)
-            cursor!!.moveToFirst()
-            entry.id = cursor.getInt(cursor.getColumnIndex(KEY_ID))
-            entry.word = cursor.getString(cursor.getColumnIndex(KEY_WORD))
         } catch (e: Exception) {
             Log.d(TAG, "QUERY EXCEPTION! ${e.message}")
         } finally {
             // Must close cursor and db now that we are done with it.
-            cursor!!.close()
+            cursor?.close()
             return entry
         }
     }
@@ -94,12 +88,8 @@ class WordListOpenHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
      *
      * @return The number of entries in WORD_LIST_TABLE.
      */
-    fun count(): Long {
-        if (mReadableDB == null) {
-            mReadableDB = readableDatabase
-        }
-        return DatabaseUtils.queryNumEntries(mReadableDB, WORD_LIST_TABLE)
-    }
+    fun count(): Long = DatabaseUtils.queryNumEntries(readableDatabase, WORD_LIST_TABLE)
+
 
     /**
      * Adds a single word row/entry to the database.
@@ -112,14 +102,10 @@ class WordListOpenHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         val values = ContentValues()
         values.put(KEY_WORD, word)
         try {
-            if (mWritableDB == null) {
-                mWritableDB = writableDatabase
-            }
-            newId = mWritableDB!!.insert(WORD_LIST_TABLE, null, values)
+            newId = writableDatabase.insert(WORD_LIST_TABLE, null, values)
         } catch (e: Exception) {
             Log.d(TAG, "INSERT EXCEPTION! ${e.message}")
         }
-
         return newId
     }
 
@@ -133,13 +119,10 @@ class WordListOpenHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
     fun update(id: Int, word: String): Int {
         var mNumberOfRowsUpdated = -1
         try {
-            if (mWritableDB == null) {
-                mWritableDB = writableDatabase
-            }
             val values = ContentValues()
             values.put(KEY_WORD, word)
 
-            mNumberOfRowsUpdated = mWritableDB!!.update(WORD_LIST_TABLE, //table to change
+            mNumberOfRowsUpdated = writableDatabase.update(WORD_LIST_TABLE, //table to change
                     values, // new values to insert
                     "$KEY_ID = ?", // selection criteria for row (in this case, the _id column)
                     arrayOf(id.toString())) //selection args; the actual value of the id
@@ -160,10 +143,7 @@ class WordListOpenHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
     fun delete(id: Int): Int {
         var deleted = 0
         try {
-            if (mWritableDB == null) {
-                mWritableDB = writableDatabase
-            }
-            deleted = mWritableDB!!.delete(WORD_LIST_TABLE, //table name
+            deleted = writableDatabase.delete(WORD_LIST_TABLE, //table name
                     "$KEY_ID = ? ", arrayOf(id.toString()))
         } catch (e: Exception) {
             Log.d(TAG, "DELETE EXCEPTION! ${e.message}")
