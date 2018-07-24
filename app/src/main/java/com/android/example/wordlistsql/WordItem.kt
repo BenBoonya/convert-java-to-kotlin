@@ -19,8 +19,5 @@ package com.android.example.wordlistsql
 /**
  * Data model for one word list item.
  */
-class WordItem {
-
-    var id: Int = 0
-    var word: String? = null
-}
+data class WordItem(var id: Int = 0,
+                    var word: String? = null)
